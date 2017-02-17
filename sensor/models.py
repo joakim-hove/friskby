@@ -77,7 +77,7 @@ class RawData(Model):
         
         if valid:
             try:
-                sensor = Sensor.objects.get( pk = data["sensorid"] )
+                sensor = Sensor.objects.get( sensor_id = data["sensorid"] )
             except Sensor.DoesNotExist:
                 valid = False
 
@@ -196,7 +196,7 @@ class RawData(Model):
             
                 # 1: Check that the sensor_id is valid.
                 try:
-                    sensor = Sensor.objects.get( pk = sensor_id )
+                    sensor = Sensor.objects.get( sensor_id = sensor_id )
                 except Sensor.DoesNotExist:
                     sensor = None
                     rd.status = RawData.INVALID_SENSOR
@@ -362,8 +362,7 @@ class SensorType( Model ):
 
 class Sensor( Model ):
     IDPattern = "[-_:a-zA-Z0-9]+"
-
-    sensor_id = CharField("Sensor ID" , max_length = 60 , primary_key = True , validators = [RegexValidator(regex = "^%s$" % IDPattern)])
+    sensor_id = CharField("Sensor ID" , unique = True, max_length = 60 , validators = [RegexValidator(regex = "^%s$" % IDPattern)])
     sensor_type = ForeignKey( SensorType )
     parent_device = ForeignKey( Device )
     data_type = ForeignKey( DataType , default = "TEST" )

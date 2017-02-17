@@ -29,7 +29,7 @@ urlpatterns = [
     url(r'^sensortype/(?P<pk>[0-9]+)/$' , SensorTypeView.as_view()),
     #
     url(r'^sensor/$' , SensorListView.as_view()),
-    url(r'^sensor/(?P<pk>%s)/$' % models.Sensor.IDPattern , SensorView.as_view()),
+    url(r'^sensor/(?P<pk>[0-9]+)/$' , SensorView.as_view()),
     #
     url(r'^sensorinfo/$' , SensorInfoView.as_view(), name = "sensor.api.list_info"),
     url(r'^sensorinfo/(?P<sensor_id>%s)/$' % models.Sensor.IDPattern , SensorInfoView.as_view(), name = "sensor.api.info"),

@@ -11,7 +11,7 @@ class SensorTest(TestCase):
 
 
     def test_validate(self):
-        obj = Sensor.objects.get( pk = "TEMP:XX" )
+        obj = Sensor.objects.get( sensor_id = "TEMP:XX" )
         self.assertFalse( obj.valid_input(  -100  ))
         self.assertFalse( obj.valid_input(   200 ))
         self.assertFalse( obj.valid_input(   "XYZ"  ))

@@ -40,7 +40,7 @@ class FilterDataView(APIView):
             return self.listView( )
             
         try:
-            sensor = Sensor.objects.get( pk = sensor_id )
+            sensor = Sensor.objects.get( sensor_id = sensor_id )
         except Sensor.DoesNotExist:
             return Response( "Sensor:%s not found" % sensor_id , status = status.HTTP_404_NOT_FOUND )
         
@@ -84,7 +84,7 @@ class SampledDataView(APIView):
             return self.listView( )
             
         try:
-            sensor = Sensor.objects.get( pk = sensor_id )
+            sensor = Sensor.objects.get( sensor_id = sensor_id )
         except Sensor.DoesNotExist:
             return Response( "Sensor:%s not found" % sensor_id , status = status.HTTP_404_NOT_FOUND )
 
