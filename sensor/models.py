@@ -106,6 +106,19 @@ class RawData(Model):
         if valid:
             valid = ApiKey.valid( data["key"] )
         
+        if valid:
+            if "timestamp" in data:
+                if not sensor.sensor_type.valid_range( float(data["value"]) ):
+                    valid = False
+            else:
+                for item in data["value_list"]:
+                    if len(item) == 2:
+                        ts_list.append( item[0] )
+                        if not sensor.sensor_type.valid_range( float(item[1]) ):
+                            valid = False
+                    else:
+                        valid = False
+                        
         return valid
 
     
@@ -200,29 +213,8 @@ class RawData(Model):
                 rd = RawData( sensor_id = sensor_id,
                               timestamp_data = TimeStamp.parse_datetime( ts ))
             
-                # 1: Check that the sensor_id is valid.
-                try:
-                    sensor = Sensor.objects.get( pk = sensor_id )
-                except Sensor.DoesNotExist:
-                    sensor = None
-                    rd.status = RawData.INVALID_SENSOR
-                    rd.string_value = string_value
+                rd.value = value
 
-
-                # 2,3: Check that value can be correctly parsed as float,
-                #      and that the numerical value is in the allowed range.
-                if rd.status == RawData.VALID:
-                    try:
-                        value = float(string_value)
-                        if not sensor.sensor_type.valid_range( value ):
-                            rd.status = RawData.RANGE_ERROR
-                            rd.string_value = string_value
-                        else:
-                            rd.value = value
-                    except ValueError:
-                        rd.status = RawData.FORMAT_ERROR
-                        rd.string_value = string_value
-                    
                 # 5: Check that sensor is online:
                 if rd.status == RawData.VALID:
                     if not sensor.on_line:
