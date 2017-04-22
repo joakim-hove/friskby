@@ -77,7 +77,8 @@ class DeviceView(generics.GenericAPIView , RetrieveModelMixin , UpdateModelMixin
         except Device.DoesNotExist:
             return Response("The device id: %s is invalid" % device_id , status = status.HTTP_404_NOT_FOUND)
 
-        serial = DeviceSerializer( data = device , context = {"key" : key})
+        serial = DeviceSerializer( device , context = {"key" : key})
+        response_data = serial.data
 
         # Here we actually lock the device after a successfull
         # GET, to ensure that the device will not be dangling in
@@ -85,7 +86,7 @@ class DeviceView(generics.GenericAPIView , RetrieveModelMixin , UpdateModelMixin
         # locking all open devices.
         device.lockDevice( )
 
-        return Response( serial.get_data( ) , status = status.HTTP_200_OK )
+        return Response( response_data , status = status.HTTP_200_OK )
 
     
 

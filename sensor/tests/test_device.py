@@ -32,6 +32,7 @@ class DeviceTest(TestCase):
         sensor_list = client_config["sensor_list"]
         self.assertEqual( len(sensor_list) , 2 )
 
+        print sensor_list,data
         self.assertTrue( "TEMP:XX" in sensor_list )
         self.assertTrue( "HUM:XX" in sensor_list )
 
@@ -60,6 +61,7 @@ class DeviceTest(TestCase):
         device.locked = False
         device.save( )
 
+        device = Device.objects.get( pk = self.context.dev.id )
         client = Client( )
         url = reverse( "api.device.info" , args = [ self.context.dev.id ])
         response = client.get( url )
@@ -69,7 +71,7 @@ class DeviceTest(TestCase):
         device.locked = True
         device.save( )
 
-
+    
     def test_get_closed_config(self):
         device = Device.objects.get( pk = self.context.dev.id )
 

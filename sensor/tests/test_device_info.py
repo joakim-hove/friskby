@@ -1,5 +1,6 @@
 import random
 import json
+import collections
 
 from django.urls import reverse
 from django.utils import timezone
@@ -11,8 +12,17 @@ from sensor.models import *
 from .context import TestContext
 
 
+
+        
 class DeviceInfoTest(TestCase):
 
+    def assert_dict_equal( self, d1 , d2 ):
+        self.assertEqual( len(d1) , len(d2) )
+        for key in d1.keys():
+            self.assertEqual( d1[key] , d2[key] )
+
+
+    
     def setUp(self):
         self.context = TestContext()
 
@@ -37,15 +47,22 @@ class DeviceInfoTest(TestCase):
         response = client.get( reverse("api.device.info" , kwargs = {"pk" : self.context.dev.id}) )
         self.assertEqual( response.status_code , status.HTTP_200_OK)
         expected = {"id" : self.context.dev.id,
-                    "location" :  {"name"     : self.context.loc.name,
+                    "location" :  {"id": self.context.loc.id,
+                                   "name"     : self.context.loc.name,
                                    "latitude" : float(self.context.loc.latitude),
+                                   "altitude" : float(self.context.loc.altitude),
                                    "longitude" : float(self.context.loc.longitude)},
                     "owner" : {"name" : self.context.user.get_full_name( ),
                                "email" : self.context.user.email },
                     "sensor_types" : [ self.context.sensor_type_temp.id, self.context.sensor_type_hum.id ]}
 
+        del expected["sensor_types"]
+        
         for key in expected.keys():
-            self.assertEqual( response.data[key] , expected[key] )
+            if isinstance( expected[key] , collections.Iterable ) and not isinstance( expected[key] , str):
+                self.assert_dict_equal( response.data[key] , expected[key] )
+            else:
+                self.assertEqual( response.data[key] , expected[key] )
 
 
     def test_get_view(self):

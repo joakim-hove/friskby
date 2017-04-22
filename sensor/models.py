@@ -73,6 +73,10 @@ class Device(Model):
     def sensorList(self):
         return Sensor.objects.filter(parent_device=self)
 
+    def sensorTypes(self):
+        return [ sensor.sensor_type for sensor in self.sensorList() ]
+
+    
     def clientConfig(self):
         # The post key is not set here, and must be explicitly set in the
         # view code if the request is correctly authorized.
@@ -82,7 +86,10 @@ class Device(Model):
                   "device_id" : self.id,
                   "channel": self.channel}
 
+        if not self.locked:
+            config["post_key"] = self.post_key.getPostKey( )
 
+            
         if self.git_version:
             config["git_repo"] = self.git_version.repo
             config["git_ref"] = self.git_version.ref

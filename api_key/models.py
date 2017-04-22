@@ -26,7 +26,10 @@ class ApiKey( Model ):
         
         return valid
 
-
+    
+    def getPostKey(self):
+        return str(self.external_key)
+    
 
     def access(self , external_key):
         if str(self.external_key) == external_key:
