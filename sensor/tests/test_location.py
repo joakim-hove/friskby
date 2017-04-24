@@ -118,3 +118,32 @@ class LocationTest(TestCase):
         self.assertEqual(self.lon, new_loc.longitude)
         self.assertEqual(self.name, new_loc.name)
         self.assertEqual(self.alt, new_loc.altitude)
+
+#class LocationTest(TestCase):
+#    def setUp(self):
+#        self.context = TestContext( )
+#        
+#
+#    def test_list(self):
+#        client = Client( )
+#        response = client.get( reverse("api.location") )
+#        self.assertEqual( response.status_code , status.HTTP_200_OK )
+#        data = response.json()
+#        self.assertEqual( len(data) , Location.objects.all().count())
+#
+#        
+#    def test_location(self):
+#        client = Client( )
+#        response = client.get( reverse("api.location" , kwargs = {"pk" : 1000} ))
+#        self.assertEqual( response.status_code , status.HTTP_404_NOT_FOUND )
+#
+#        response = client.get( reverse("api.location" , kwargs = {"pk" : self.context.loc.id} ))
+#        self.assertEqual( response.status_code , status.HTTP_200_OK )
+#
+#        data = response.json( )
+#        loc = self.context.loc
+#        self.assertEqual( data["name"] , loc.name )
+#        self.assertEqual( data["id"] , loc.id )
+#        self.assertEqual( data["latitude"] , loc.latitude )
+#        self.assertEqual( data["longitude"] , loc.longitude )
+#

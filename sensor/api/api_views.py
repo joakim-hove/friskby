@@ -133,14 +133,6 @@ class DeviceView(View):
 
 #################################################################
 
-class LocationListView(generics.ListCreateAPIView):
-    queryset = models.Location.objects.all()
-    serializer_class = LocationSerializer
-
-
-class LocationView(generics.RetrieveAPIView):
-    queryset = models.Location.objects.all()
-    serializer_class = LocationSerializer
 
 class LocationCreator(View):
 
@@ -167,6 +159,23 @@ class LocationCreator(View):
         device.save()
         red = reverse("view.device.info", kwargs={'pk':device.id})
         return HttpResponseRedirect(red)
+
+class LocationView(APIView):
+
+    def get(self, request , *arg, **kwargs):
+        if "pk" in kwargs:
+            pk = int(kwargs["pk"])
+            try:
+                location = Location.objects.get( pk = pk)
+            except Location.DoesNotExist:
+                return Response( {} , status = status.HTTP_404_NOT_FOUND)
+
+            serial_data = LocationSerializer( location )
+            return Response( serial_data.data )
+        else:
+            serial_data = LocationSerializer( Location.objects.all() , many = True)
+            return Response( serial_data.data )
+
 
 #################################################################
 
