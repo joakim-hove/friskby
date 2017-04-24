@@ -24,8 +24,10 @@ class Command(BaseCommand):
         if "num" in options:
             num = int(options["num"])
 
-        total_size = RawData.objects.all().count()
-        qs = RawData.objects.all()[offset:offset+num]
+        ulriken = Location.objects.get( pk = 1 )
+            
+        total_size = RawData.objects.filter(location = ulriken).count()
+        qs = RawData.objects.filter(location = ulriken)[offset:offset+num]
         index = offset
         size = len(qs)
         for rd in qs:
@@ -33,9 +35,10 @@ class Command(BaseCommand):
             rd.save( )
 
             index += 1
-            if (index % 100) == 0:
+            if (index % 10) >= 0:
                 print "%d / %d / %d" % (index, offset + size , total_size)
                 
-            if index == total_size:
-                print "Complete"
-            
+        if index == total_size:
+            print "Last row: %d / %d / %d" % (index, offset + size , total_size)
+        else:
+            print "%d / %d / %d" % (index, offset + size , total_size)
