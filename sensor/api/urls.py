@@ -8,8 +8,8 @@ urlpatterns = [
     url(r'^device/$' , DeviceView.as_view() , name = "api.device.info"),
     url(r'^device/(?P<pk>%s)/$' % models.Device.IDPattern, DeviceView.as_view() , name = "api.device.info"),
     #
-    url(r'^location/$' , LocationView.as_view(), name = "api.location"),
-    url(r'^location/(?P<pk>[0-9]+)/$' , LocationView.as_view() , name="api.location"),
+    url(r'^location/$' , LocationView.as_view(), name = "sensor.api.location"),
+    url(r'^location/(?P<pk>[0-9]+)/$' , LocationView.as_view() , name="sensor.api.location"),
     #
     #-----------------------------------------------------------------
     #
