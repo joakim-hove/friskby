@@ -8,8 +8,11 @@ urlpatterns = [
     url(r'^device/$' , DeviceView.as_view() , name = "api.device.info"),
     url(r'^device/(?P<pk>%s)/$' % models.Device.IDPattern, DeviceView.as_view() , name = "api.device.info"),
     #
-    url(r'^location/$' , LocationView.as_view(), name = "api.location"),
-    url(r'^location/(?P<pk>[0-9]+)/$' , LocationView.as_view() , name="api.location"),
+    url(r'^location/$' , LocationView.as_view(), name = "sensor.api.location"),
+    url(r'^location/(?P<pk>[0-9]+)/$' , LocationView.as_view() , name="sensor.api.location"),
+    #
+    url(r'^location/create/(?P<pk>%s)/$' % models.Device.IDPattern,
+        DeviceLocation.as_view(), name="sensor.api.device_location"),
     #
     #-----------------------------------------------------------------
     #
@@ -20,11 +23,6 @@ urlpatterns = [
     #
     url(r'^device_type/$' , DeviceTypeListView.as_view()),
     url(r'^device_type/(?P<pk>[0-9]+)/$' , DeviceTypeView.as_view()),
-    #
-    url(r'^location/$' , LocationView.as_view()),
-    url(r'^location/(?P<pk>[0-9]+)/$' , LocationView.as_view()),
-    url(r'^location/create/(?P<pk>%s)/$' % models.Device.IDPattern,
-        LocationCreator.as_view(), name="sensor.api.location.create"),
     #
     url(r'^data_type/$' , DataTypeListView.as_view()),
     url(r'^data_type/(?P<pk>[0-9]+)/$' , DataTypeView.as_view()),

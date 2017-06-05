@@ -1,7 +1,8 @@
 from django.test import TestCase, Client
 from django.urls import reverse
+from rest_framework import status
 
-from sensor.models import Device
+from sensor.models import Device,Location
 from .context import TestContext
 from api_key.models import ApiKey
 
@@ -12,11 +13,12 @@ class LocationTest(TestCase):
         self.context = TestContext()
         self.client = Client()
         self.dev_id = self.context.dev.id
-        self.url = reverse("sensor.api.location.create",
+        self.url = reverse("sensor.api.device_location",
                            kwargs={'pk': self.dev_id})
         self.key = str(self.context.dev.post_key.external_key)
         self.name, self.lat, self.lon, self.alt = 'Planet Hoth', 60.588, 7.48, 1222
 
+        
     def test_get_location(self):
         device = Device.objects.get(pk=self.context.dev.id)
         # name = "Ulriken", latitude = 200, longitude = 120, altitude = 600
@@ -30,18 +32,28 @@ class LocationTest(TestCase):
         self.assertIn(msg, err.message)
 
     def test_create_location_key_issues(self):
+        
         with self.assertRaises(KeyError) as ctx:
-            self.client.get(self.url)
+            data = {'latitude': self.lat,
+                    'longitude': self.lon,
+                    'name': self.name}
+            self.client.get(self.url, data = data)
         self._assert_error_msg(ctx.exception, 'Missing API-key')
-
+        
         with self.assertRaises(KeyError) as ctx:
-            data = {'key': 'no-such-key'}
+            data = {'latitude': self.lat,
+                    'longitude': self.lon,
+                    'name': self.name,
+                    'key' : 'Invalid'}
             self.client.get(self.url, data=data)
         self._assert_error_msg(ctx.exception, 'Invalid')
 
         other_existing_key = ApiKey.objects.create(description="Newerkey")
         with self.assertRaises(KeyError) as ctx:
-            data = {'key': other_existing_key.external_key}
+            data = {'latitude': self.lat,
+                    'longitude': self.lon,
+                    'name': self.name,
+                    'key' : other_existing_key.external_key} 
             self.client.get(self.url, data=data)
         self._assert_error_msg(ctx.exception, 'Invalid')
 
@@ -88,7 +100,7 @@ class LocationTest(TestCase):
             self.client.get(self.url, data=data)
 
 
-    def test_create_location(self):
+    def test_create_location_GET(self):
         data = {'key': self.key,
                 'latitude': self.lat,
                 'longitude': self.lon,
@@ -103,6 +115,22 @@ class LocationTest(TestCase):
         self.assertEqual(self.name, new_loc.name)
         self.assertEqual(0, new_loc.altitude)
 
+    def test_create_location_POST(self):
+        data = {'key': self.key,
+                'latitude': self.lat,
+                'longitude': self.lon,
+                'name': self.name}
+        self.client.post(self.url, data=data)
+
+        device = Device.objects.get(pk=self.context.dev.id)
+        new_loc = device.location
+
+        self.assertEqual(self.lat, new_loc.latitude)
+        self.assertEqual(self.lon, new_loc.longitude)
+        self.assertEqual(self.name, new_loc.name)
+        self.assertEqual(0, new_loc.altitude)
+
+        
     def test_create_location_with_altitude(self):
         data = {'key': self.key,
                 'latitude': self.lat,
@@ -119,31 +147,26 @@ class LocationTest(TestCase):
         self.assertEqual(self.name, new_loc.name)
         self.assertEqual(self.alt, new_loc.altitude)
 
-#class LocationTest(TestCase):
-#    def setUp(self):
-#        self.context = TestContext( )
-#        
-#
-#    def test_list(self):
-#        client = Client( )
-#        response = client.get( reverse("api.location") )
-#        self.assertEqual( response.status_code , status.HTTP_200_OK )
-#        data = response.json()
-#        self.assertEqual( len(data) , Location.objects.all().count())
-#
-#        
-#    def test_location(self):
-#        client = Client( )
-#        response = client.get( reverse("api.location" , kwargs = {"pk" : 1000} ))
-#        self.assertEqual( response.status_code , status.HTTP_404_NOT_FOUND )
-#
-#        response = client.get( reverse("api.location" , kwargs = {"pk" : self.context.loc.id} ))
-#        self.assertEqual( response.status_code , status.HTTP_200_OK )
-#
-#        data = response.json( )
-#        loc = self.context.loc
-#        self.assertEqual( data["name"] , loc.name )
-#        self.assertEqual( data["id"] , loc.id )
-#        self.assertEqual( data["latitude"] , loc.latitude )
-#        self.assertEqual( data["longitude"] , loc.longitude )
-#
+    def test_list(self):
+        client = Client( )
+        response = client.get( reverse("sensor.api.location") )
+        self.assertEqual( response.status_code , status.HTTP_200_OK )
+        data = response.json()
+        self.assertEqual( len(data) , Location.objects.all().count())
+
+        
+    def test_location(self):
+        client = Client( )
+        response = client.get( reverse("sensor.api.location" , kwargs = {"pk" : 1000} ))
+        self.assertEqual( response.status_code , status.HTTP_404_NOT_FOUND )
+
+        response = client.get( reverse("sensor.api.location" , kwargs = {"pk" : self.context.loc.id} ))
+        self.assertEqual( response.status_code , status.HTTP_200_OK )
+
+        data = response.json( )
+        loc = self.context.loc
+        self.assertEqual( data["name"] , loc.name )
+        self.assertEqual( data["id"] , loc.id )
+        self.assertEqual( data["latitude"] , loc.latitude )
+        self.assertEqual( data["longitude"] , loc.longitude )
+

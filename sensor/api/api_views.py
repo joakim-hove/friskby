@@ -134,32 +134,37 @@ class DeviceView(View):
 #################################################################
 
 
-class LocationCreator(View):
-
-    def get(self, request, pk):
-        device = get_object_or_404(Device, pk=pk)
-        device_data = DeviceSerializer(data=device)
-        if 'key' not in request.GET:
+class DeviceLocation(View):
+    
+    def create(self, device_id, dict_arg):
+        if 'key' not in dict_arg:
             raise KeyError('Missing API-key "key".  Needed to authenticate.')
-        authenticate(device, request.GET['key'])
+        key = dict_arg['key']
+        device = get_object_or_404(Device, pk=device_id)
+        authenticate(device, key)
 
-        for k in ('latitude', 'longitude', 'name'):
-            if k not in request.GET:
-                raise KeyError('Missing key %s' % k)
-        payload = {'key': request.GET['key'],
-                   'latitude': request.GET['latitude'],
-                   'longitude': request.GET['longitude'],
-                   'name': request.GET['name'],
-                   'altitude': 0,  # optional, set if exists
-        }
-        if 'altitude' in request.GET:
-            payload['altitude'] = request.GET['altitude']
-        loc = Location.create(payload)
+        loc = Location.objects.create( latitude  = dict_arg['latitude'],
+                                       longitude = dict_arg['longitude'],
+                                       name      = dict_arg['name'],
+                                       altitude  = dict_arg.get('altitude', 0))
         device.location = loc
         device.save()
+        
         red = reverse("view.device.info", kwargs={'pk':device.id})
         return HttpResponseRedirect(red)
 
+    
+    def get(self, request, pk):
+        return self.create( pk , request.GET )
+
+
+    
+    def post(self, request, pk):
+        return self.create( pk , request.POST )
+        
+
+
+    
 class LocationView(APIView):
 
     def get(self, request , *arg, **kwargs):
